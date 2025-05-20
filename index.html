@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URLShortener Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/dist/recharts.umd.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { Link } = ReactRouterDOM; // Assuming React Router is available
+
+    // Header Component
+    const Header = () => {
+      const [isScrolled, setIsScrolled] = useState(false);
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const isActiveLink = (path) => location.pathname === path;
+
+      return (
+        <header className={`fixed w-full z-50 transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-[#0A1628]/95 backdrop-blur-lg border-b border-blue-900/50'
+            : 'bg-[#0A1628]'
+        }`}>
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className={`p-2 rounded-xl transition-all duration-300 ${
+                  isScrolled 
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500' 
+                    : 'bg-gradient-to-r from-blue-500 to-blue-400'
+                } hover:shadow-lg hover:shadow-blue-500/25`}>
+                  <svg className="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none">
+                    <path d="M13.5 12H21M21 12L18.5 9.5M21 12L18.5 14.5" 
+                          stroke="currentColor" strokeWidth="2" 
+                          strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 5V3C21 2.44772 20.5523 2 20 2H4C3.44772 2 3 2.44772 3 3V21C3 21.5523 3.44772 22 4 22H20C20.5523 22 21 21.5523 21 21V19" 
+                          stroke="currentColor" strokeWidth="2" 
+                          strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
+                    URLShortener
+                  </h1>
+                  <p className="text-xs text-blue-400">Simplify your links</p>
+                </div>
+              </Link>
+              <nav className="hidden md:flex items-center space-x-8">
+                {['Home', 'Features', 'Pricing'].map((item) => (
+                  <Link
+                    key={item}
+                    to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                    className={`text-sm font-medium text-gray-300 hover:text-blue-400 transition-colors ${
+                      isActiveLink(`/${item.toLowerCase()}`) && 'text-blue-400'
+                    }`}
+                  >
+                    {item}
+                  </Link>
+                ))}
+                <div className="flex items-center space-x-4">
+                  <Link
+                    to="/login"
+                    className="text-sm font-medium text-gray-300 hover:text-blue-400 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              </nav>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <svg className={`w-6 h-6 transition-transform ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
+                  )}
+                </svg>
+              </button>
+            </div>
+            <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-screen opacity-100 pt-4' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+              <div className="rounded-xl p-4 bg-[#111827] border border-blue-900/50">
+                <nav className="flex flex-col space-y-4">
+                  {['Home', 'Features', 'Pricing'].map((item) => (
+                    <Link
+                      key={item}
+                      to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-sm font-medium text-gray-300 hover:text-blue-400 transition-colors"
+                    >
+                      {item}
+                    </Link>
+                  ))}
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm font-medium text-gray-300 hover:text-blue-400 transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-sm font-medium text-blue-400 hover:text-blue-500 transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </header>
+      );
+    };
+
+    // Footer Component
+    const Footer = () => {
+      return (
+        <footer className="bg-[#0A1628] text-white mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 to-transparent"></div>
+            <div className="container mx-auto px-4 py-12 relative">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div className="col-span-1 md:col-span-2">
+                  <Link to="/" className="flex items-center space-x-3 group">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+                      <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+                        <path d="M13.5 12H21M21 12L18.5 9.5M21 12L18.5 14.5" 
+                              stroke="currentColor" strokeWidth="2" 
+                              strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M21 5V3C21 2.44772 20.5523 2 20 2H4C3.44772 2 3 2.44772 3 3V21C3 21.5523 3.44772 22 4 22H20C20.5523 22 21 21.5523 21 21V19" 
+                              stroke="currentColor" strokeWidth="2" 
+                              strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-200 bg-clip-text text-transparent">
+                        URLShortener
+                      </h2>
+                      <p className="text-sm text-blue-400">Simplify your links</p>
+                    </div>
+                  </Link>
+                  <p className="mt-4 text-gray-400 max-w-md">
+                    Modern URL shortening platform built with advanced technology stack. 
+                    Create, manage, and track your shortened links with powerful analytics.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
+                    Quick Links
+                  </h3>
+                  <ul className="space-y-3">
+                    {['Home', 'Features', 'Pricing', 'Dashboard'].map((item) => (
+                      <li key={item}>
+                        <Link
+                          to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                          className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center"
+                        >
+                          <svg className="w-3 h-3 mr-2" viewBox="0 0 12 12" fill="none">
+                            <path d="M4 2L8 6L4 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          {item}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
+                    Contact Us
+                  </h3>
+                  <div className="space-y-3">
+                    <a href="mailto:support@urlshortener.com" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center">
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                      </svg>
+                      support@urlshortener.com
+                    </a>
+                    <a href="tel:+1234567890" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center">
+                      <svg className="w-4 h-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                      </svg>
+                      +1 (234) 567-890
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-8 mt-8 border-t border-blue-900/50">
+                <div className="flex flex-col md:flex-row justify-between items-center">
+                  <p className="text-sm text-gray-400">© 2025 URLShortener. All rights reserved.</p>
+                  <div className="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">Privacy Policy</a>
+                    <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">Terms of Service</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+      );
+    };
+
+    // AnalyticsPage Component
+    const AnalyticsPage = () => {
+      const [activeTab, setActiveTab] = useState('overview');
+
+      // Dummy data for analytics
+      const dummyAnalytics = {
+        totalClicks: 7,
+        clicksByCity: { 'Gavrilov-Yam': 5, 'Multan': 2 },
+        clicksByHour: { '09:00': 4, '16:00': 1, '20:00': 2 },
+        clicksByCityAndHour: {
+          'Gavrilov-Yam': { '09:00': 4, '16:00': 0, '20:00': 1 },
+          'Multan': { '09:00': 0, '16:00': 1, '20:00': 1 }
+        }
+      };
+
+      const renderContent = () => {
+        switch (activeTab) {
+          case 'overview':
+            return (
+              <div className="space-y-6">
+                <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
+                  <h2 className="text-xl font-semibold text-white mb-4">Total Clicks</h2>
+                  <p className="text-3xl font-bold text-blue-400">{dummyAnalytics.totalClicks}</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
+                    <h3 className="text-lg font-semibold text-white mb-4">Clicks by City</h3>
+                    <div className="h-64">
+                      <code type="chartjs">
+                        {
+                          JSON.stringify({
+                            type: 'pie',
+                            data: {
+                              labels: Object.keys(dummyAnalytics.clicksByCity),
+                              datasets: [{
+                                data: Object.values(dummyAnalytics.clicksByCity),
+                                backgroundColor: ['#3B82F6', '#93C5FD'],
+                                borderColor: ['#1E40AF', '#60A5FA'],
+                                borderWidth: 1
+                              }]
+                            },
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
+                              }
+                            }
+                          })
+                        }
+                      </code>
+                    </div>
+                  </div>
+                  <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
+                    <h3 className="text-lg font-semibold text-white mb-4">Clicks by Hour</h3>
+                    <div className="h-64">
+                      <code type="chartjs">
+                        {
+                          JSON.stringify({
+                            type: 'bar',
+                            data: {
+                              labels: Object.keys(dummyAnalytics.clicksByHour),
+                              datasets: [{
+                                label: 'Clicks',
+                                data: Object.values(dummyAnalytics.clicksByHour),
+                                backgroundColor: '#3B82F6',
+                                borderColor: '#1E40AF',
+                                borderWidth: 1
+                              }]
+                            },
+                            options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: { labels: { color: '#D1D5DB' } },
+                                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
+                              },
+                              scales: { y: { beginAtZero: true, ticks: { color: '#D1D5DB' } } }
+                            }
+                          })
+                        }
+                      </code>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50 h-64">
+                  <h3 className="text-lg font-semibold text-white mb-4">Heatmap</h3>
+                  {/* Empty space for heatmap as requested */}
+                  <div className="h-full flex items-center justify-center text-gray-500">Heatmap placeholder</div>
+                </div>
+              </div>
+            );
+          case 'locations':
+            return (
+              <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Clicks by Location</h3>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-blue-900/50">
+                      <th className="py-2 text-gray-400">City</th>
+                      <th className="py-2 text-gray-400">Clicks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(dummyAnalytics.clicksByCity).map(([city, clicks]) => (
+                      <tr key={city} className="border-b border-blue-900/50">
+                        <td className="py-2 text-white">{city}</td>
+                        <td className="py-2 text-blue-400">{clicks}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          case 'time-analysis':
+            return (
+              <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
+                <h3 className="text-lg font-semibold text-white mb-4">Clicks by City and Hour</h3>
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-blue-900/50">
+                      <th className="py-2 text-gray-400">City</th>
+                      <th className="py-2 text-gray-400">09:00</th>
+                      <th className="py-2 text-gray-400">16:00</th>
+                      <th className="py-2 text-gray-400">20:00</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(dummyAnalytics.clicksByCityAndHour).map(([city, hours]) => (
+                      <tr key={city} className="border-b border-blue-900/50">
+                        <td className="py-2 text-white">{city}</td>
+                        <td className="py-2 text-blue-400">{hours['09:00']}</td>
+                        <td className="py-2 text-blue-400">{hours['16:00']}</td>
+                        <td className="py-2 text-blue-400">{hours['20:00']}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-[#0A1628] text-white flex flex-col">
+          <Header />
+          <main className="container mx-auto px-4 py-8 flex-grow pt-20">
+            <h1 className="text-2xl font-bold mb-6">Analytics Dashboard</h1>
+            <div className="mb-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`px-4 py-2 mr-2 rounded-lg ${activeTab === 'overview' ? 'bg-blue-600 text-white' : 'bg-blue-900/50 text-gray-400'} hover:bg-blue-500 transition-colors`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('locations')}
+                className={`px-4 py-2 mr-2 rounded-lg ${activeTab === 'locations' ? 'bg-blue-600 text-white' : 'bg-blue-900/50 text-gray-400'} hover:bg-blue-500 transition-colors`}
+              >
+                Locations
+              </button>
+              <button
+                onClick={() => setActiveTab('time-analysis')}
+                className={`px-4 py-2 rounded-lg ${activeTab === 'time-analysis' ? 'bg-blue-600 text-white' : 'bg-blue-900/50 text-gray-400'} hover:bg-blue-500 transition-colors`}
+              >
+                Time Analysis
+              </button>
+            </div>
+            {renderContent()}
+          </main>
+          <Footer />
+        </div>
+      );
+    };
+
+    // Root component to render the app
+    const App = () => <AnalyticsPage />;
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
