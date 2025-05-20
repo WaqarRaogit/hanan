@@ -14,7 +14,7 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     // Header Component
     const Header = () => {
@@ -233,6 +233,69 @@
         }
       };
 
+      // Refs for canvas elements
+      const cityChartRef = useRef(null);
+      const hourChartRef = useRef(null);
+      const cityChartInstance = useRef(null);
+      const hourChartInstance = useRef(null);
+
+      // Initialize charts
+      useEffect(() => {
+        if (cityChartRef.current && hourChartRef.current) {
+          if (cityChartInstance.current) cityChartInstance.current.destroy();
+          if (hourChartInstance.current) hourChartInstance.current.destroy();
+
+          cityChartInstance.current = new Chart(cityChartRef.current.getContext('2d'), {
+            type: 'pie',
+            data: {
+              labels: Object.keys(dummyAnalytics.clicksByCity),
+              datasets: [{
+                data: Object.values(dummyAnalytics.clicksByCity),
+                backgroundColor: ['#3B82F6', '#93C5FD'],
+                borderColor: ['#1E40AF', '#60A5FA'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'top', labels: { color: '#D1D5DB' } },
+                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
+              }
+            }
+          });
+
+          hourChartInstance.current = new Chart(hourChartRef.current.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: Object.keys(dummyAnalytics.clicksByHour),
+              datasets: [{
+                label: 'Clicks',
+                data: Object.values(dummyAnalytics.clicksByHour),
+                backgroundColor: '#3B82F6',
+                borderColor: '#1E40AF',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { labels: { color: '#D1D5DB' } },
+                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
+              },
+              scales: { y: { beginAtZero: true, ticks: { color: '#D1D5DB' } } }
+            }
+          });
+        }
+
+        return () => {
+          if (cityChartInstance.current) cityChartInstance.current.destroy();
+          if (hourChartInstance.current) hourChartInstance.current.destroy();
+        };
+      }, [activeTab]); // Re-run when activeTab changes to ensure correct chart
+
       const renderContent = () => {
         switch (activeTab) {
           case 'overview':
@@ -246,61 +309,13 @@
                   <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
                     <h3 className="text-lg font-semibold text-white mb-4">Clicks by City</h3>
                     <div className="h-64">
-                      <code type="chartjs">
-                        {
-                          JSON.stringify({
-                            type: 'pie',
-                            data: {
-                              labels: Object.keys(dummyAnalytics.clicksByCity),
-                              datasets: [{
-                                data: Object.values(dummyAnalytics.clicksByCity),
-                                backgroundColor: ['#3B82F6', '#93C5FD'],
-                                borderColor: ['#1E40AF', '#60A5FA'],
-                                borderWidth: 1
-                              }]
-                            },
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: {
-                                legend: { position: 'top', labels: { color: '#D1D5DB' } },
-                                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
-                              }
-                            }
-                          })
-                        }
-                      </code>
+                      <canvas ref={cityChartRef}></canvas>
                     </div>
                   </div>
                   <div className="bg-[#111827] p-6 rounded-xl border border-blue-900/50">
                     <h3 className="text-lg font-semibold text-white mb-4">Clicks by Hour</h3>
                     <div className="h-64">
-                      <code type="chartjs">
-                        {
-                          JSON.stringify({
-                            type: 'bar',
-                            data: {
-                              labels: Object.keys(dummyAnalytics.clicksByHour),
-                              datasets: [{
-                                label: 'Clicks',
-                                data: Object.values(dummyAnalytics.clicksByHour),
-                                backgroundColor: '#3B82F6',
-                                borderColor: '#1E40AF',
-                                borderWidth: 1
-                              }]
-                            },
-                            options: {
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: {
-                                legend: { labels: { color: '#D1D5DB' } },
-                                tooltip: { bodyColor: '#F9FAFB', titleColor: '#F9FAFB' }
-                              },
-                              scales: { y: { beginAtZero: true, ticks: { color: '#D1D5DB' } } }
-                            }
-                          })
-                        }
-                      </code>
+                      <canvas ref={hourChartRef}></canvas>
                     </div>
                   </div>
                 </div>
